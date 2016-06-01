@@ -1,0 +1,11 @@
+{
+    "logger": {
+        "name": "gfw-guira-loss-api-STAGING",
+        "level": "debug",
+        "toFile": false,
+        "dirLogFile": null
+    },
+    "service": {
+        "port": null
+    }
+}

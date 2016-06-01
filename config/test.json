@@ -1,0 +1,8 @@
+{
+    "logger": {
+        "name": "gfw-guira-loss-api-TEST",
+        "level": "debug",
+        "toFile": false,
+        "dirLogFile": null
+    }
+}
