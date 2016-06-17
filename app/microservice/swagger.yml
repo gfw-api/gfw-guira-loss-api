@@ -294,7 +294,7 @@ definitions:
     properties:
       data:
         properties:
-          $schema:
+          schema:
             $ref: '#/definitions/GUIRALATESTBody'
   GUIRALATESTBody:
     type: object
@@ -321,7 +321,7 @@ definitions:
     properties:
       data:
         properties:
-          $schema:
+          schema:
             $ref: '#/definitions/GUIRAALERTSBody'
 
   GUIRAALERTSBody:
