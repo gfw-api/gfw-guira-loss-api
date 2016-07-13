@@ -3,13 +3,14 @@
 var logger = require('logger');
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
 var guiraLossSerializer = new JSONAPISerializer('guira-loss', {
-    attributes: ['value', 'period', 'min_date', 'max_date', 'downloadUrls'],
+    attributes: ['value', 'period', 'min_date', 'max_date', 'downloadUrls', 'area_ha'],
     typeForAttribute: function(attribute, record) {
         return attribute;
     },
     downloadUrls: {
         attributes: ['csv', 'geojson', 'kml', 'shp', 'svg']
-    }
+    },
+    keyForAttribute: 'camelCase'
 });
 
 var guiraLatestSerializer = new JSONAPISerializer('guira-latest', {
