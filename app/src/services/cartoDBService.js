@@ -16,41 +16,40 @@ const WORLD = `SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max
                   ST_GeomFromGeoJSON('{{{geojson}}}'), 4326), f.the_geom)`;
 
 const ISO = `with r as (SELECT date,pais,sup, prov_dep FROM gran_chaco_deforestation),
-              d as (SELECT name_1,iso, id_1, name_0 FROM gadm2_provinces_simple),
-              f as (select * from r inner join d on prov_dep=name_1)
-        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
+             d as (SELECT (ST_Area(geography(the_geom))/10000) as area_ha, iso, name_0 FROM gadm2_countries_simple WHERE iso = UPPER('{{iso}}')),
+             f as (select * from r right join d on pais=name_0 AND date >= '{{begin}}'::date
+             AND date <= '{{end}}'::date)
+        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
         FROM f
-        WHERE iso = UPPER('{{iso}}')
-            AND date >= '{{begin}}'::date
-            AND date <= '{{end}}'::date `;
+        group by area_ha `;
 
 const ID1 = ` with r as (SELECT date,pais,sup, prov_dep FROM gran_chaco_deforestation),
-              d as (SELECT name_1,iso, id_1, name_0 FROM gadm2_provinces_simple),
-              f as (select * from r inner join d on prov_dep=name_1)
-        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
+              d as (SELECT name_1, iso, id_1, name_0,(ST_Area(geography(the_geom))/10000) as area_ha FROM gadm2_provinces_simple WHERE iso = UPPER('{{iso}}') AND id_1 = {{id1}}),
+              f as (select * from r right join d on prov_dep=name_1 AND date >= '{{begin}}'::date
+              AND date <= '{{end}}'::date)
+        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
         FROM f
-        WHERE iso = UPPER('{{iso}}')
-            AND id_1 = {{id1}}
-            AND date >= '{{begin}}'::date
-            AND date <= '{{end}}'::date `;
+        group by area_ha `;
 
-const USE = `SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
-        FROM {{useTable}} u, gran_chaco_deforestation f
+const USE = `SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
+        FROM {{useTable}} u left join gran_chaco_deforestation f
+        on ST_Intersects(f.the_geom, u.the_geom) AND date >= '{{begin}}'::date
+        AND date <= '{{end}}'::date
         WHERE u.cartodb_id = {{pid}}
-              AND ST_Intersects(f.the_geom, u.the_geom)
-              AND date >= '{{begin}}'::date
-              AND date <= '{{end}}'::date `;
+        group by area_ha `;
 
-const WDPA = `WITH p as (SELECT CASE when marine::numeric = 2 then null
-        when ST_NPoints(the_geom)<=18000 THEN the_geom
-       WHEN ST_NPoints(the_geom) BETWEEN 18000 AND 50000 THEN ST_RemoveRepeatedPoints(the_geom, 0.001)
-      ELSE ST_RemoveRepeatedPoints(the_geom, 0.005)
-       END as the_geom FROM wdpa_protected_areas where wdpaid={{wdpaid}})
-        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
-        FROM gran_chaco_deforestation f, p
-        WHERE ST_Intersects(f.the_geom, p.the_geom)
-              AND date >= '{{begin}}'::date
-              AND date <= '{{end}}'::date `;
+const WDPA = `WITH p as (SELECT CASE
+              WHEN marine::numeric = 2 then null
+              WHEN ST_NPoints(the_geom)<=18000 THEN the_geom
+              WHEN ST_NPoints(the_geom) BETWEEN 18000 AND 50000 THEN ST_RemoveRepeatedPoints(the_geom, 0.001)
+              ELSE ST_RemoveRepeatedPoints(the_geom, 0.005)
+             END as the_geom, gis_area*100 as area_ha FROM wdpa_protected_areas where wdpaid={{wdpaid}})
+        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
+        FROM gran_chaco_deforestation f right join p
+        ON ST_Intersects(f.the_geom, p.the_geom)
+        AND date >= '{{begin}}'::date
+              AND date <= '{{end}}'::date
+        group by area_ha `;
 
 const LATEST = `SELECT DISTINCT date
         FROM gran_chaco_deforestation
@@ -70,7 +69,7 @@ var executeThunk = function(client, sql, params) {
 
 var deserializer = function(obj) {
     return function(callback) {
-        new JSONAPIDeserializer().deserialize(obj, callback);
+        new JSONAPIDeserializer({keyForAttribute: 'camelCase'}).deserialize(obj, callback);
     };
 };
 
@@ -106,6 +105,7 @@ class CartoDBService {
             let formats = ['csv', 'geojson', 'kml', 'shp', 'svg'];
             let download = {};
             let queryFinal = Mustache.render(query, params);
+            queryFinal = queryFinal.replace('sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha', 'f.*');
             queryFinal = queryFinal.replace('sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date', 'f.*');
             queryFinal = encodeURIComponent(queryFinal);
             for(let i=0, length = formats.length; i < length; i++){
@@ -245,7 +245,10 @@ class CartoDBService {
                 let result = data.rows[0];
                 result.period = this.getPeriodText(period);
                 result.downloadUrls = this.getDownloadUrls(WORLD, params);
+                result.area_ha = geostore.areaHa;
                 return result;
+            } else {
+
             }
             return null;
         }
