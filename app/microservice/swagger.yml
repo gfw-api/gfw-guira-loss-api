@@ -1,7 +1,19 @@
 swagger: '2.0'
 info:
   title: GFW Guira Loss API
-  description: Global Forest Watch - Guira Loss API. Identifies monthly deforestation in the Gran Chaco region
+  description: |
+    ## Global Forest Watch - Guira Loss API
+
+    Identifies monthly deforestation in the Gran Chaco region
+
+    | Property | Value |
+    | --- | --- | --- |
+    | Coverage | Gran Chaco (parts of Paraguay, Argentina, and Bolivia) |
+    | Resolution | 30 x 30 meters (Landsat) |
+    | Source | Guyra |
+    | Timescale | September 2011–present |
+    | Units | Hectares |
+    | Updates | Monthly |
   version: "1.0.0"
 host: example.vizzuality.com
 
