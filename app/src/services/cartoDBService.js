@@ -7,7 +7,8 @@ var Mustache = require('mustache');
 var NotFound = require('errors/notFound');
 var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 
-const WORLD = `SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
+const WORLD = `SELECT sum(st_area(st_intersection(ST_SetSRID(
+                  ST_GeomFromGeoJSON('{{{geojson}}}'), 4326), f.the_geom), true)/10000) as area, MIN(date) as min_date, MAX(date) as max_date
         FROM gran_chaco_deforestation f
         WHERE date >= '{{begin}}'::date
               AND date <= '{{end}}'::date
