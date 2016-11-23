@@ -1,51 +1,124 @@
 swagger: '2.0'
+###############################################################################
+#                              API Information                                 
+###############################################################################
 info:
-  title: GFW Guira Loss API
+  title: GLobal Forest Watch API
   description: |
-    ## Global Forest Watch - Guira Loss API
-
+    The Global Forest Watch API is currently in beta. Based on feedback from trusted testers, this document specifies new API changes that are currently under development. Interested in being a trusted tester? Contact the [Data Lab](mailTo:support@wri.com) at World Resources Institute.
+    
+    All endpoints are accessible via http & https and are located at
+    `https://production-api.globalforestwatch.org`.
+    
+    Forest change measures tree cover loss, tree cover gain, or forest disturbance. The following forest change data are available through the API: 
+    * University of Maryland tree cover loss & gain 
+    * FORMA alerts
+    * IMAZON SAD alerts
+    * Terrai alerts
+    * Prodes
+    * Guira Loss
+    * Biomass loss
+    * GLAD tree cover loss alerts 
+    * NASA VIIRs active fires.
+    
+    Other services provided by the Api complements the ecosystem that surrounds the platform:
+    
+    * Metadata
+    * Urthecast 
+    * Geostore
+    * OGR 
+    * Story 
+    * User 
+    * subscription
+    
+  
+    ### Forest Change - GUIRA Loss API
     Identifies monthly deforestation in the Gran Chaco region
-
+    
     | Property | Value |
     | --- | --- | --- |
     | Coverage | Gran Chaco (parts of Paraguay, Argentina, and Bolivia) |
     | Resolution | 30 x 30 meters (Landsat) |
-    | Source | Guyra |
+    | Source | [Guyra](http://guyra.org.py/) |
     | Timescale | September 2011–present |
     | Units | Hectares |
     | Updates | Monthly |
+  termsOfService: http://www.globalforestwatch.org/terms
+  contact:
+    name: API Support
+    url: http://www.globalforestwatch.org
+    email: support@wri.com
+  license:
+    name: MIT License (MIT)
+    url: https://opensource.org/licenses/MIT
   version: "1.0.0"
-host: example.vizzuality.com
+  
+host: staging-api.globalforestwatch.org
 
 schemes:
   - https
   - http
 
-produces:
+consumes:
   - application/vnd.api+json
 
+produces:
+  - application/vnd.api+json
+###############################################################################
+#                                  Security                                    
+###############################################################################
+#securityDefinitions:
+#  UserSecurity:
+#    type: apiKey
+#   in: header
+#    name: Authorization
+#    description: For write operations we need to provide a token like  ```Bearer {{TOKEN}}```
+#security:
+#        - UserSecurity: []
+###############################################################################
+#                                  Paths                                   
+###############################################################################
 paths:
   /guira-loss:
     get:
+      description: |
+        Retrives total number of alerts for your custom geometry on the period selected
       operationId: world
+      consumes:
+        - application/vnd.api+json
       produces:
         - application/vnd.api+json
+        - application/json
       tags:
-        - GUIRA
+       - GUIRA
       parameters:
         - name: geostore
           in: query
-          description: Hash of the geostore
+          description: |
+            Geostore hash 
+            ```34cecd4c4809dbbec20ce40be3d1c877```
           required: true
           type: string
         - name: period
           in: query
-          description: Period of time (default last day) (example 2004-01-17,2015-06-01)
+          description: |
+            Period of time 
+            ```2015-01-01,2016-12-01```
           required: true
           type: string
+
       responses:
         200:
-          description: Results obtained
+          description: Results obteined
+          examples:
+              data: 
+                type: use
+                id: f123fswse13
+                attributes:
+                  loss: 988
+                  gain: 988
+                  treeExtent: 988
+                  areaHa: 10472.639768453402
           schema:
             $ref: '#/definitions/GUIRAALERTSAPI'
         404:
@@ -64,29 +137,46 @@ paths:
   /guira-loss/use/{name}/{id}:
     get:
       operationId: use
+      description: |
+        Retrives total number of alerts for your selected concession geometry on the period selected
       produces:
         - application/vnd.api+json
       tags:
-        - GUIRA
+       - GUIRA
       parameters:
         - name: name
           in: path
-          description: Analisys name (['mining', 'oilpalm', 'fiber', 'logging'])
+          description: |
+            Concession type, one of  
+            ```mining, oilpalm, fiber, logging```
           required: true
           type: string
         - name: id
           in: path
-          description: cartodbid
+          description: |
+            Concession geometry id
+            ``` 100 ```
           required: true
           type: integer
         - name: period
           in: query
-          description: Period of time (default last day) (example 2004-01-17,2015-06-01)
+          description: |
+            Period of time 
+            ```2015-01-01,2016-12-01```
           required: true
           type: string
       responses:
         200:
           description: Results obtained
+          examples:
+              data: 
+                type: use
+                id: f123fswse13
+                attributes:
+                  loss: 988
+                  gain: 988
+                  treeExtent: 988
+                  areaHa: 10472.639768453402
           schema:
             $ref: '#/definitions/GUIRAALERTSAPI'
         404:
@@ -105,25 +195,40 @@ paths:
   /guira-loss/wdpa/{id}:
     get:
       operationId: wdpa
+      description: |
+        Retrives total number of alerts for your selected protected area on the period selected
       produces:
         - application/vnd.api+json
       tags:
-        - GUIRA
+       - GUIRA
       parameters:
         - name: id
           in: path
-          description: wdpa id
+          description: |
+            wdpa id
+            ``` 56670 ```
           required: true
           type: integer
         - name: period
           in: query
-          description: Period of time (default last day) (example 2004-01-17,2015-06-01)
+          description: |
+            Period of time 
+            ```2015-01-01,2016-12-01```
           required: true
           type: string
 
       responses:
         200:
           description: Results obtained
+          examples:
+              data: 
+                type: use
+                id: f123fswse13
+                attributes:
+                  loss: 988
+                  gain: 988
+                  treeExtent: 988
+                  areaHa: 10472.639768453402
           schema:
             $ref: '#/definitions/GUIRAALERTSAPI'
         404:
@@ -141,29 +246,46 @@ paths:
 
   /guira-loss/admin/{iso}:
     get:
-      description: a
       operationId: getNational
+      description: |
+        Retrives total number of alerts for your selected country on the period selected
       produces:
         - application/vnd.api+json
       tags:
-        - GUIRA
+       - GUIRA
       parameters:
         - name: iso
           in: path
-          description: ISO code
+          description: |
+            ISO-3 country code 
+            ``` BRA ```
           required: true
           type: string
+          maxLength: 3
+          pattern: \w*
         - name: period
           in: query
-          description: Period of time (default last day) (example 2004-01-17,2015-06-01)
+          description: |
+            Period of time 
+            ```2015-01-01,2016-12-01```
           required: true
           type: string
 
       responses:
         200:
           description: Results obtained
+          examples:
+              data: 
+                type: use
+                id: f123fswse13
+                attributes:
+                  loss: 988
+                  gain: 988
+                  treeExtent: 988
+                  areaHa: 10472.639768453402
+                  
           schema:
-            $ref: '#/definitions/GUIRAALERTSAPI'
+           $ref: '#/definitions/GUIRAALERTSAPI'
         404:
           description: Geostore not found
           schema:
@@ -179,28 +301,38 @@ paths:
 
   /guira-loss/admin/{iso}/{id1}:
     get:
-      description: a
       operationId: getSubnational
+      description: |
+        Retrives total number of alerts for your selected admin 1 area based on GADM 2 on the period selected
       produces:
         - application/vnd.api+json
       tags:
-        - GUIRA
+       - GUIRA
       parameters:
         - name: iso
           in: path
-          description: ISO code
+          description: |
+            ISO-3 country code 
+            ``` BRA ```
           required: true
           type: string
+          maxLength: 3
+          pattern: \w*
         - name: id1
           in: path
-          description: Region code
+          description: |
+            numeric code for admin 1 region code based on GADM 2 
+            ``` 2 ```
           required: true
           type: integer
         - name: period
           in: query
-          description: Period of time (default last day) (example 2004-01-17,2015-06-01)
+          description: |
+            Period of time 
+            ```2015-01-01,2016-12-01```
           required: true
           type: string
+
       responses:
         200:
           description: Results obtained
@@ -218,14 +350,15 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Errors'
-
-  /guira-loss/latest:
+  /glad-alerts/latest:
     get:
       operationId: getLatest
+      description: |
+        Retrives latest alerts
       produces:
         - application/vnd.api+json
       tags:
-        - GUIRA
+        - GLAD
       parameters:
         - name: limit
           in: query
@@ -248,6 +381,7 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Errors'
+            
 
 definitions:
   Errors:
@@ -298,6 +432,10 @@ definitions:
       meta:
         type: object
         description: A meta object containing non-standard meta-information about the error.
+#############################################################################
+#                            Models                                
+#############################################################################
+
   GUIRALATESTAPI:
     type: object
     properties:
