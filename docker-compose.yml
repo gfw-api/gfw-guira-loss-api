@@ -5,8 +5,9 @@ prod:
   env_file:
     - prod.env
   command: start
-  log_driver: "gelf"
   dns: ${DNS_SERVER}
   restart: always
+  log_driver: "syslog"
   log_opt:
-    gelf-address: ${GELF_ADDRESS}
+    syslog-address: ${SYSLOG_ADDRESS}
+    tag: gfw-guira-loss-api${STAGING}
