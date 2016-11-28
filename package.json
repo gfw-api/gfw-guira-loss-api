@@ -1,6 +1,6 @@
 {
   "name": "gfw-guira-loss-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Global forest watch - UMD Guira Loss API",
   "main": "index.js",
   "scripts": {
