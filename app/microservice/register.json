@@ -3,42 +3,42 @@
     "name": "#(service.name)",
     "tags": ["gfw"],
     "urls": [{
-        "url": "/guira-loss/admin/:iso",
+        "url": "/v1/guira-loss/admin/:iso",
         "method": "GET",
         "endpoints": [{
             "method": "GET",
             "path": "/api/v1/guira-loss/admin/:iso"
         }]
     }, {
-        "url": "/guira-loss/admin/:iso/:id1",
+        "url": "/v1/guira-loss/admin/:iso/:id1",
         "method": "GET",
         "endpoints": [{
             "method": "GET",
             "path": "/api/v1/guira-loss/admin/:iso/:id1"
         }]
     }, {
-        "url": "/guira-loss/use/:name/:id",
+        "url": "/v1/guira-loss/use/:name/:id",
         "method": "GET",
         "endpoints": [{
             "method": "GET",
             "path": "/api/v1/guira-loss/use/:name/:id"
         }]
     }, {
-        "url": "/guira-loss/wdpa/:id",
+        "url": "/v1/guira-loss/wdpa/:id",
         "method": "GET",
         "endpoints": [{
             "method": "GET",
             "path": "/api/v1/guira-loss/wdpa/:id"
         }]
     }, {
-        "url": "/guira-loss",
+        "url": "/v1/guira-loss",
         "method": "GET",
         "endpoints": [{
             "method": "GET",
             "path": "/api/v1/guira-loss"
         }]
     }, {
-        "url": "/guira-loss/latest",
+        "url": "/v1/guira-loss/latest",
         "method": "GET",
         "endpoints": [{
             "method": "GET",
