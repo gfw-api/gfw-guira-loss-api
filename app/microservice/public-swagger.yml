@@ -32,17 +32,17 @@ info:
     * subscription
     
   
-    ### Forest Change - GUIRA Loss API
-    Identifies monthly deforestation in the Gran Chaco region
+    ### Forest Change - Imazon Alerts API
+    Deforestation alert system that monitors forest cover loss and forest degradation in the Brazilian Amazon
     
     | Property | Value |
     | --- | --- | --- |
-    | Coverage | Gran Chaco (parts of Paraguay, Argentina, and Bolivia) |
-    | Resolution | 30 x 30 meters (Landsat) |
-    | Source | [Guyra](http://guyra.org.py/) |
-    | Timescale | September 2011–present |
+    | Coverage | Brazilian Amazon |
+    | Resolution | 250 x 250 meters (MODIS, validated with Landsat and CBERS) |
+    | Timescale | January 2007-present |
     | Units | Hectares |
     | Updates | Monthly |
+    |Source| [Imazon](http://imazon.org.br/?lang=en)|
   termsOfService: http://www.globalforestwatch.org/terms
   contact:
     name: API Support
@@ -64,6 +64,8 @@ consumes:
 
 produces:
   - application/vnd.api+json
+
+basePath: /v1
 ###############################################################################
 #                                  Security                                    
 ###############################################################################
@@ -79,7 +81,7 @@ produces:
 #                                  Paths                                   
 ###############################################################################
 paths:
-  /guira-loss:
+  /imazon-alerts:
     get:
       description: |
         Retrives total number of alerts for your custom geometry on the period selected
@@ -90,7 +92,7 @@ paths:
         - application/vnd.api+json
         - application/json
       tags:
-       - GUIRA
+        - IMAZON
       parameters:
         - name: geostore
           in: query
@@ -112,15 +114,93 @@ paths:
           description: Results obteined
           examples:
               data: 
-                type: use
+                type: imazon-alerts
                 id: f123fswse13
                 attributes:
-                  loss: 988
-                  gain: 988
-                  treeExtent: 988
+                  value: []
                   areaHa: 10472.639768453402
+                  downloadUrls:
+                    csv: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=csv
+                    json: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=json
           schema:
-            $ref: '#/definitions/GUIRAALERTSAPI'
+            $ref: '#/definitions/IMAZONALERTSAPI'
+        404:
+          description: Geostore not found
+          schema:
+            $ref: '#/definitions/Errors'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+    post:
+      description: |
+        Retrives total number of alerts for your custom geometry on the period selected
+      operationId: worldWithGeojson
+      consumes:
+        - application/vnd.api+json
+      produces:
+        - application/vnd.api+json
+        - application/json
+      tags:
+        - IMAZON
+      parameters:
+        - name: geojson
+          in: body
+          description: |
+            ##### examples
+              ```json
+              {
+                  "geojson": {
+                      "type": "FeatureCollection",
+                      "features": [{
+                          "type": "Feature",
+                          "properties": {},
+                          "geometry": {
+                              "type": "Polygon",
+                              "coordinates": [
+                                  [
+                                      [-5.273512601852417, 42.81137220349083],
+                                      [-5.273512601852417, 42.811803118457306],
+                                      [-5.272732079029083, 42.811803118457306],
+                                      [-5.272732079029083, 42.81137220349083],
+                                      [-5.273512601852417, 42.81137220349083]
+                                  ]
+                              ]
+                          }
+                      }]
+                  }
+              }
+              ```
+          required: true
+          schema:
+            $ref: '#/definitions/GeoJsonBodyRequest'
+        - name: period
+          in: query
+          description: |
+            Period of time 
+            ```2015-01-01,2016-12-01```
+          required: true
+          type: string
+
+      responses:
+        200:
+          description: Results obteined
+          examples:
+              data: 
+                type: imazon-alerts
+                id: f123fswse13
+                attributes:
+                  value: []
+                  areaHa: 10472.639768453402
+                  downloadUrls:
+                    csv: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=csv
+                    json: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=json
+          schema:
+            $ref: '#/definitions/IMAZONALERTSAPI'
         404:
           description: Geostore not found
           schema:
@@ -134,7 +214,7 @@ paths:
           schema:
             $ref: '#/definitions/Errors'
 
-  /guira-loss/use/{name}/{id}:
+  /imazon-alerts/use/{name}/{id}:
     get:
       operationId: use
       description: |
@@ -142,7 +222,7 @@ paths:
       produces:
         - application/vnd.api+json
       tags:
-       - GUIRA
+        - IMAZON
       parameters:
         - name: name
           in: path
@@ -170,15 +250,16 @@ paths:
           description: Results obtained
           examples:
               data: 
-                type: use
+                type: imazon-alerts
                 id: f123fswse13
                 attributes:
-                  loss: 988
-                  gain: 988
-                  treeExtent: 988
+                  value: 988
                   areaHa: 10472.639768453402
+                  downloadUrls:
+                    csv: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=csv
+                    json: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=json
           schema:
-            $ref: '#/definitions/GUIRAALERTSAPI'
+            $ref: '#/definitions/IMAZONALERTSAPI'
         404:
           description: Geostore not found
           schema:
@@ -192,7 +273,7 @@ paths:
           schema:
             $ref: '#/definitions/Errors'
 
-  /guira-loss/wdpa/{id}:
+  /imazon-alerts/wdpa/{id}:
     get:
       operationId: wdpa
       description: |
@@ -200,7 +281,7 @@ paths:
       produces:
         - application/vnd.api+json
       tags:
-       - GUIRA
+        - IMAZON
       parameters:
         - name: id
           in: path
@@ -222,15 +303,16 @@ paths:
           description: Results obtained
           examples:
               data: 
-                type: use
+                type: imazon-alerts
                 id: f123fswse13
                 attributes:
-                  loss: 988
-                  gain: 988
-                  treeExtent: 988
+                  value: 988
                   areaHa: 10472.639768453402
+                  downloadUrls:
+                    csv: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=csv
+                    json: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=json
           schema:
-            $ref: '#/definitions/GUIRAALERTSAPI'
+            $ref: '#/definitions/IMAZONALERTSAPI'
         404:
           description: Geostore not found
           schema:
@@ -244,7 +326,7 @@ paths:
           schema:
             $ref: '#/definitions/Errors'
 
-  /guira-loss/admin/{iso}:
+  /imazon-alerts/admin/{iso}:
     get:
       operationId: getNational
       description: |
@@ -252,7 +334,7 @@ paths:
       produces:
         - application/vnd.api+json
       tags:
-       - GUIRA
+        - IMAZON
       parameters:
         - name: iso
           in: path
@@ -261,8 +343,6 @@ paths:
             ``` BRA ```
           required: true
           type: string
-          maxLength: 3
-          pattern: \w*
         - name: period
           in: query
           description: |
@@ -276,16 +356,16 @@ paths:
           description: Results obtained
           examples:
               data: 
-                type: use
+                type: imazon-alerts
                 id: f123fswse13
                 attributes:
-                  loss: 988
-                  gain: 988
-                  treeExtent: 988
+                  value: 988
                   areaHa: 10472.639768453402
-                  
+                  downloadUrls:
+                    csv: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=csv
+                    json: /download/274b4818-be18-4890-9d10-eae56d2a82e5?sql=select lat, lon, confidence, year, julian_day from index_b846230fcec0420892d13fc11ea7e32b where year = 2016 and julian_day >= 1 and julian_day <= 347&geostore=34cecd4c4809dbbec20ce40be3d1c877&format=json
           schema:
-           $ref: '#/definitions/GUIRAALERTSAPI'
+            $ref: '#/definitions/IMAZONALERTSAPI'
         404:
           description: Geostore not found
           schema:
@@ -299,7 +379,7 @@ paths:
           schema:
             $ref: '#/definitions/Errors'
 
-  /guira-loss/admin/{iso}/{id1}:
+  /imazon-alerts/admin/{iso}/{id1}:
     get:
       operationId: getSubnational
       description: |
@@ -307,7 +387,7 @@ paths:
       produces:
         - application/vnd.api+json
       tags:
-       - GUIRA
+        - IMAZON
       parameters:
         - name: iso
           in: path
@@ -316,8 +396,6 @@ paths:
             ``` BRA ```
           required: true
           type: string
-          maxLength: 3
-          pattern: \w*
         - name: id1
           in: path
           description: |
@@ -337,38 +415,7 @@ paths:
         200:
           description: Results obtained
           schema:
-            $ref: '#/definitions/GUIRAALERTSAPI'
-        404:
-          description: Geostore not found
-          schema:
-            $ref: '#/definitions/Errors'
-        500:
-          description: Unexpected error
-          schema:
-            $ref: '#/definitions/Errors'
-        default:
-          description: unexpected error
-          schema:
-            $ref: '#/definitions/Errors'
-  /glad-alerts/latest:
-    get:
-      operationId: getLatest
-      description: |
-        Retrives latest alerts
-      produces:
-        - application/vnd.api+json
-      tags:
-        - GLAD
-      parameters:
-        - name: limit
-          in: query
-          description: Limit. Default 3
-          type: integer
-      responses:
-        200:
-          description: Results obtained
-          schema:
-            $ref: '#/definitions/GUIRALATESTAPI'
+            $ref: '#/definitions/IMAZONALERTSAPI'
         404:
           description: Geostore not found
           schema:
@@ -382,6 +429,37 @@ paths:
           schema:
             $ref: '#/definitions/Errors'
             
+  /imazon-alerts/latest:
+    get:
+      operationId: getLatest
+      description: |
+        Retrives latest alerts
+      produces:
+        - application/vnd.api+json
+      tags:
+        - IMAZON
+      parameters:
+        - name: limit
+          in: query
+          description: Limit. Default 3
+          type: integer
+      responses:
+        200:
+          description: Results obtained
+          schema:
+            $ref: '#/definitions/IMAZONLATESTAPI'
+        404:
+          description: Geostore not found
+          schema:
+            $ref: '#/definitions/Errors'
+        500:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Errors'
 
 definitions:
   Errors:
@@ -436,14 +514,14 @@ definitions:
 #                            Models                                
 #############################################################################
 
-  GUIRALATESTAPI:
+  IMAZONLATESTAPI:
     type: object
     properties:
       data:
         properties:
           schema:
-            $ref: '#/definitions/GUIRALATESTBody'
-  GUIRALATESTBody:
+            $ref: '#/definitions/IMAZONLATESTBody'
+  IMAZONLATESTBody:
     type: object
     properties:
       type:
@@ -455,23 +533,24 @@ definitions:
       attributes:
         properties:
           schema:
-            $ref: '#/definitions/GUIRALATESTModel'
+            $ref: '#/definitions/IMAZONLATESTModel'
 
-  GUIRALATESTModel:
+  IMAZONLATESTModel:
     type: object
     properties:
-      time:
+      date:
         type: string
         format: date
-  GUIRAALERTSAPI:
+
+  IMAZONALERTSAPI:
     type: object
     properties:
       data:
         properties:
           schema:
-            $ref: '#/definitions/GUIRAALERTSBody'
+            $ref: '#/definitions/IMAZONALERTSBody'
 
-  GUIRAALERTSBody:
+  IMAZONALERTSBody:
     type: object
     properties:
       type:
@@ -483,20 +562,29 @@ definitions:
       attributes:
         properties:
           schema:
-            $ref: '#/definitions/GUIRAALERTSModel'
+            $ref: '#/definitions/IMAZONALERTSModel'
 
-  GUIRAALERTSModel:
+  IMAZONALERTSModel:
     type: object
     properties:
       value:
-        type: number
-        format: float
-      min-date:
-        type: string
-        format: date-time
-      max-date:
-        type: string
-        format: date-time
+        type: array
+        items:
+          type: object
+          properties:
+            data-type:
+              type: string
+            value:
+              type: number
+              format: float
+            min-date:
+              type: string
+              format: date-time
+            max-date:
+              type: string
+              format: date-time
+            period:
+              type: string
       download-urls:
         type: object
         properties:
@@ -510,3 +598,47 @@ definitions:
             type: string
           svg:
             type: string
+  GeoJsonBodyRequest:
+    type: object
+    properties:
+      geojson:
+        properties:
+          schema:
+            $ref: '#/definitions/Features'
+  Features:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Type of feature
+      features:
+        type: array
+        description: Features
+        items:
+          $ref: '#/definitions/Feature'
+  Feature:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Type of feature
+      properties:
+        type: object
+        description: Feature
+      geometry:
+        type: object
+        description: Geometries
+        properties:
+          schema:
+            $ref: '#/definitions/Geometry'
+  Geometry:
+    type: object
+    properties:
+      type:
+        type: string
+        description: Geometry type
+      coordinates:
+        type: array
+        description: Coordinates array
+        items:
+          type: object

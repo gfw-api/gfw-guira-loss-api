@@ -44,5 +44,12 @@
             "method": "GET",
             "path": "/api/v1/guira-loss/latest"
         }]
+    }, {
+        "url": "/v1/guira-loss",
+        "method": "POST",
+        "endpoints": [{
+            "method": "POST",
+            "path": "/api/v1/guira-loss"
+        }]
     }]
 }
