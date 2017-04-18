@@ -254,7 +254,7 @@ class CartoDBService {
             if(data.rows.length > 0){
                 result.area_ha = data.rows[0].area_ha;
             }
-            result.downloadUrls = this.getDownloadUrls(ISO, params);
+            result.downloadUrls = this.getDownloadUrls(WORLD, params);
             return result;
         }
         return null;
