@@ -235,7 +235,7 @@ class CartoDBService {
 
         let geostore = yield this.getGeostore(hashGeoStore);
         if (geostore && geostore.geojson) {
-            return CartoDBService.getWorldWithGeojson(geostore.geojson, period);
+            return this.getWorldWithGeojson(geostore.geojson, period);
         }
         throw new NotFound('Geostore not found');
     }
