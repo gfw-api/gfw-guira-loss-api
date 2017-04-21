@@ -63,7 +63,6 @@ class guiraLossRouter {
         this.assert(this.query.geostore, 400, 'GeoJSON param required');
         try {
             let data = yield CartoDBService.getWorld(this.query.geostore, this.query.period);
-
             this.body = GuiraLossSerializer.serialize(data);
         } catch (err) {
             if (err instanceof NotFound) {
@@ -74,6 +73,42 @@ class guiraLossRouter {
         }
 
     }
+
+    static checkGeojson(geojson) {
+        if (geojson.type.toLowerCase() === 'polygon'){
+            return {
+                type: 'FeatureCollection',
+                features: [{
+                    type: 'Feature',
+                    geometry: geojson
+                }]
+            };
+        } else if (geojson.type.toLowerCase() === 'feature') {
+            return {
+                type: 'FeatureCollection',
+                features: [geojson]
+            };
+        } 
+        return geojson;
+    }
+
+    static * worldWithGeojson() {
+        logger.info('Obtaining world data with geostore');
+        this.assert(this.request.body.geojson, 400, 'GeoJSON param required');
+        try{            
+            let data = yield CartoDBService.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), this.query.period);
+
+            this.body = GuiraLossSerializer.serialize(data);
+        } catch(err){
+            if(err instanceof NotFound){
+                this.throw(404, 'Geostore not found');
+                return;
+            }
+            throw err;
+        }
+
+    }
+
     static * latest() {
         logger.info('Obtaining latest data');
         let data = yield CartoDBService.latest(this.query.limit);
@@ -96,6 +131,7 @@ router.get('/admin/:iso/:id1', isCached, guiraLossRouter.getSubnational);
 router.get('/use/:name/:id', isCached, guiraLossRouter.use);
 router.get('/wdpa/:id', isCached, guiraLossRouter.wdpa);
 router.get('/', isCached, guiraLossRouter.world);
+router.post('/', isCached, guiraLossRouter.worldWithGeojson);
 router.get('/latest', isCached, guiraLossRouter.latest);
 
 
