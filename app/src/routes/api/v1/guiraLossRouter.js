@@ -88,15 +88,15 @@ class guiraLossRouter {
                 type: 'FeatureCollection',
                 features: [geojson]
             };
-        } 
+        }
         return geojson;
     }
 
     static * worldWithGeojson() {
         logger.info('Obtaining world data with geostore');
         this.assert(this.request.body.geojson, 400, 'GeoJSON param required');
-        try{            
-            let data = yield CartoDBService.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), this.query.period);
+        try{
+            let data = yield CartoDBService.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), null, this.request.body.period);
 
             this.body = GuiraLossSerializer.serialize(data);
         } catch(err){
