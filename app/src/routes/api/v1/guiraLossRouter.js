@@ -96,7 +96,7 @@ class guiraLossRouter {
         logger.info('Obtaining world data with geostore');
         this.assert(this.request.body.geojson, 400, 'GeoJSON param required');
         try{
-            let data = yield CartoDBService.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), null, this.request.body.period);
+            let data = yield CartoDBService.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), null, this.query.period);
 
             this.body = GuiraLossSerializer.serialize(data);
         } catch(err){
