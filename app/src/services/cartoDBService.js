@@ -20,7 +20,7 @@ const WORLD = `
         )
         SELECT  c.value, p.area_ha
         FROM c, p`;
-
+const AREA = `select ST_Area(ST_SetSRID(ST_GeomFromGeoJSON('{{{geojson}}}'), 4326), TRUE)/10000 as area_ha`;
 const ISO = `with r as (SELECT date,pais,sup, prov_dep FROM gran_chaco_deforestation),
              d as (SELECT iso, name_0 FROM gadm2_countries_simple WHERE iso = UPPER('{{iso}}')),
              f as (select * from r right join d on pais=name_0 AND date >= '{{begin}}'::date
@@ -256,18 +256,18 @@ class CartoDBService {
             end: periods[1]
         };
         let data = yield executeThunk(this.client, WORLD, params);
+        let dataArea = yield executeThunk(this.client, AREA, params);
+        let result = {
+            area_ha: dataArea.rows[0].area_ha
+        };
         if (data.rows) {
-            let result = data.rows[0];
-            if(data.rows.length > 0){
-                result.area_ha = data.rows[0].area_ha;
-            }
-            if (areaHa) {
-                result.area_ha = areaHa;
-            }
-            result.downloadUrls = this.getDownloadUrls(WORLD, params);
-            return result;
+            result.value = data.rows[0].value || 0;
+
         }
-        return null;
+        result.area_ha = dataArea.rows[0].area_ha;
+        result.downloadUrls = this.getDownloadUrls(WORLD, params);
+        return result;
+        
     }
 
     * latest(limit=3) {
