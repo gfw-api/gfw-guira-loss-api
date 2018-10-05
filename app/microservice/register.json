@@ -3,6 +3,62 @@
     "name": "#(service.name)",
     "tags": ["gfw"],
     "urls": [{
+        "url": "/v2/guira-loss/admin/:iso",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss/admin/:iso"
+        }]
+    }, {
+        "url": "/v2/guira-loss/admin/:iso/:id1",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss/admin/:iso/:id1"
+        }]
+    }, {
+        "url": "/v2/guira-loss/admin/:iso/:id1/:id2",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss/admin/:iso/:id1/:id2"
+        }]
+    }, {
+        "url": "/v2/guira-loss/use/:name/:id",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss/use/:name/:id"
+        }]
+    }, {
+        "url": "/v2/guira-loss/wdpa/:id",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss/wdpa/:id"
+        }]
+    }, {
+        "url": "/v2/guira-loss",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss"
+        }]
+    }, {
+        "url": "/v2/guira-loss/latest",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v2/guira-loss/latest"
+        }]
+    }, {
+        "url": "/v2/guira-loss",
+        "method": "POST",
+        "endpoints": [{
+            "method": "POST",
+            "path": "/api/v2/guira-loss"
+        }]
+    },{
         "url": "/v1/guira-loss/admin/:iso",
         "method": "GET",
         "endpoints": [{
