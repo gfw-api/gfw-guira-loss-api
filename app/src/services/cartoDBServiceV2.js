@@ -61,7 +61,7 @@ const WDPA = `WITH p as (SELECT CASE
 
 const LATEST = `with a AS (SELECT DISTINCT date
     FROM gran_chaco_deforestation
-    WHERE ano IS NOT NULL) SELECT MAX(date) AS latest FROM a`;
+    WHERE date IS NOT NULL) SELECT MAX(date) AS latest FROM a`;
 
 var executeThunk = function(client, sql, params) {
     return function(callback) {
