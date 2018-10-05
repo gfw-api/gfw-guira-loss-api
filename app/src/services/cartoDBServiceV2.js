@@ -21,21 +21,21 @@ const WORLD = `
         FROM c, p`;
 const AREA = `select ST_Area(ST_SetSRID(ST_GeomFromGeoJSON('{{{geojson}}}'), 4326), TRUE)/10000 as area_ha`;
 const ISO = `with r as (SELECT date,pais,sup, the_geom FROM gran_chaco_deforestation),
-             d as (SELECT ST_simplify(the_geom, {{simplify}}) AS the_geom, iso, name_0, area_ha FROM gadm36_countries WHERE iso = UPPER('{{iso}}')),
+             d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, iso, name_0, area_ha FROM gadm36_countries WHERE iso = UPPER('{{iso}}')),
              f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
              AND date <= '{{end}}'::date)
         SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
         FROM f GROUP BY area_ha`;
 
 const ID1 = ` with r as (SELECT date,pais,sup, the_geom FROM gran_chaco_deforestation),
-              d as (SELECT ST_simplify(the_geom, {{simplify}}) AS the_geom, name_1, iso, gid_1, name_0, area_ha FROM gadm36_adm1 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}'),
+              d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, name_1, iso, gid_1, name_0, area_ha FROM gadm36_adm1 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}'),
               f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
               AND date <= '{{end}}'::date)
         SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
         FROM f GROUP BY area_ha`;
 
 const ID2 = ` with r as (SELECT date,pais,sup, the_geom FROM gran_chaco_deforestation),
-        d as (SELECT ST_simplify(the_geom, {{simplify}}) AS the_geom, name_1, iso, gid_1, name_0, gid_2, name_2, area_ha FROM gadm36_adm2 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}' AND gid_2 = '{{id2}}'),
+        d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, name_1, iso, gid_1, name_0, gid_2, name_2, area_ha FROM gadm36_adm2 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}' AND gid_2 = '{{id2}}'),
         f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
         AND date <= '{{end}}'::date)
   SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
