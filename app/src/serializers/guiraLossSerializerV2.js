@@ -8,7 +8,7 @@ var guiraLossSerializerV2 = new JSONAPISerializer('guira-loss', {
         return attribute;
     },
     downloadUrls: {
-        attributes: ['csv', 'geojson', 'kml', 'shp', 'svg']
+        attributes: ['csv', 'json', 'kml', 'shp', 'svg']
     },
     keyForAttribute: 'camelCase'
 });
