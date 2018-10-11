@@ -265,7 +265,7 @@ class CartoDBServiceV2 {
             result.value = 0;
             return result;
         }
-        const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
+        const geostore = yield GeostoreService.getGeostoreByWdpa(wdpaid);
         if(geostore){
             return {
                 id: wdpaid,
