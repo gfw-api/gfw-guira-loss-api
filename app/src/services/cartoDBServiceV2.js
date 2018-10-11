@@ -230,13 +230,13 @@ class CartoDBServiceV2 {
             result.value = 0;
             return result;
         }
-        const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
+        const geostore = yield GeostoreService.getGeostoreByUse(useTable, id);
         if(geostore){
             return {
                 id, id,
                 value: 0,
                 area_ha: geostore.area_ha
-            }
+            };
         }
         return null;
     }
@@ -271,7 +271,7 @@ class CartoDBServiceV2 {
                 id: wdpaid,
                 value: 0,
                 area_ha: geostore.area_ha
-            }
+            };
         }
         return null;
     }
