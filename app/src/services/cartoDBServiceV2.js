@@ -219,6 +219,7 @@ class CartoDBServiceV2 {
         
         if (data.rows && data.rows.length > 0) {
             let result = data.rows[0];
+            result.id = 'USE';
             result.period = this.getPeriodText(period);
             result.downloadUrls = this.getDownloadUrls(USE, params);
             return result;
@@ -226,6 +227,7 @@ class CartoDBServiceV2 {
         let areas = yield executeThunk(this.client, USEAREA, params);
         if (areas.rows && areas.rows.length > 0) {
             let result = areas.rows[0];
+            result.id = 'USE';
             result.value = 0;
             return result;
         }
@@ -244,6 +246,7 @@ class CartoDBServiceV2 {
         let data = yield executeThunk(this.client, WDPA, params);
         if (data.rows && data.rows.length > 0) {
             let result = data.rows[0];
+            result.id = 'WDPA';
             result.period = period;
             result.downloadUrls = this.getDownloadUrls(WDPA, params);
             return result;
@@ -251,6 +254,7 @@ class CartoDBServiceV2 {
         let areas = yield executeThunk(this.client, WDPAAREA, params);
         if (areas.rows && areas.rows.length > 0) {
             let result = areas.rows[0];
+            result.id = 'WDPA';
             result.value = 0;
             return result;
         }
