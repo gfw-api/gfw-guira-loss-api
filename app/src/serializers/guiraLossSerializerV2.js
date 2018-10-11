@@ -13,7 +13,7 @@ var guiraLossSerializerV2 = new JSONAPISerializer('guira-loss', {
     keyForAttribute: 'camelCase'
 });
 
-var guiraLatestSerializer = new JSONAPISerializer('guira-latest', {
+var guiraLatestSerializerV2 = new JSONAPISerializer('guira-latest', {
     attributes: ['latest'],
     typeForAttribute: function(attribute, record) {
         return attribute;
@@ -26,7 +26,7 @@ class GuiraLossSerializerV2 {
         return guiraLossSerializerV2.serialize(data);
     }
     static serializeLatest(data) {
-        return guiraLatestSerializer.serialize(data);
+        return guiraLatestSerializerV2.serialize(data);
     }
 }
 
