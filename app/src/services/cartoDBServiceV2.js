@@ -216,7 +216,6 @@ class CartoDBServiceV2 {
         };
 
         let data = yield executeThunk(this.client, USE, params);
-        
         if (data.rows && data.rows.length > 0) {
             let result = data.rows[0];
             result.id = id;
@@ -230,6 +229,13 @@ class CartoDBServiceV2 {
             result.id = id;
             result.value = 0;
             return result;
+        }
+        const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
+        if(geostore){
+            return {
+                value: 0,
+                area_ha: geostore.area_ha
+            }
         }
         return null;
     }
@@ -257,6 +263,13 @@ class CartoDBServiceV2 {
             result.id = wdpaid;
             result.value = 0;
             return result;
+        }
+        const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
+        if(geostore){
+            return {
+                value: 0,
+                area_ha: geostore.area_ha
+            }
         }
         return null;
     }
