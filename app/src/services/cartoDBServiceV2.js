@@ -19,33 +19,39 @@ const WORLD = `
         )
         SELECT  c.value, p.area_ha
         FROM c, p`;
+
 const AREA = `select ST_Area(ST_SetSRID(ST_GeomFromGeoJSON('{{{geojson}}}'), 4326), TRUE)/10000 as area_ha`;
+
 const ISO = `with r as (SELECT date,pais,sup, the_geom FROM gran_chaco_deforestation),
-             d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, iso, name_0, area_ha FROM gadm36_countries WHERE iso = UPPER('{{iso}}')),
-             f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
-             AND date <= '{{end}}'::date)
-        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
-        FROM f GROUP BY area_ha`;
+d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, iso, name_0, area_ha FROM gadm36_countries WHERE iso = UPPER('{{iso}}')),
+f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
+AND date <= '{{end}}'::date)
+SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
+FROM f GROUP BY area_ha`;
 
 const ID1 = ` with r as (SELECT date,pais,sup, the_geom FROM gran_chaco_deforestation),
-              d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, name_1, iso, gid_1, name_0, area_ha FROM gadm36_adm1 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}'),
-              f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
-              AND date <= '{{end}}'::date)
-        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
-        FROM f GROUP BY area_ha`;
+d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, name_1, iso, gid_1, name_0, area_ha FROM gadm36_adm1 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}'),
+f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
+AND date <= '{{end}}'::date)
+SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
+FROM f GROUP BY area_ha`;
 
 const ID2 = ` with r as (SELECT date,pais,sup, the_geom FROM gran_chaco_deforestation),
-        d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, name_1, iso, gid_1, name_0, gid_2, name_2, area_ha FROM gadm36_adm2 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}' AND gid_2 = '{{id2}}'),
-        f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
-        AND date <= '{{end}}'::date)
-  SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
-  FROM f GROUP BY area_ha`;
+d as (SELECT ST_makevalid(ST_simplify(the_geom, {{simplify}})) AS the_geom, name_1, iso, gid_1, name_0, gid_2, name_2, area_ha FROM gadm36_adm2 WHERE iso = UPPER('{{iso}}') AND gid_1 = '{{id1}}' AND gid_2 = '{{id2}}'),
+f as (select * from r right join d on ST_intersects(r.the_geom, d.the_geom) AND date >= '{{begin}}'::date
+AND date <= '{{end}}'::date)
+SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
+FROM f GROUP BY area_ha`;
 
-const USE = `SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
-        FROM {{useTable}} u inner join gran_chaco_deforestation f
-        on ST_Intersects(f.the_geom, u.the_geom) AND date >= '{{begin}}'::date
-        AND date <= '{{end}}'::date
-        WHERE u.cartodb_id = {{pid}}`;
+const USEAREA = `select area_ha FROM {{useTable}} WHERE cartodb_id = {{pid}}`;
+
+const USE = `SELECT area_ha, sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
+FROM {{useTable}} u inner join gran_chaco_deforestation f
+on ST_Intersects(f.the_geom, u.the_geom) AND date >= '{{begin}}'::date
+AND date <= '{{end}}'::date
+WHERE u.cartodb_id = {{pid}} GROUP BY u.area_ha`;
+
+const WDPAAREA = `select gis_area*100 as area_ha FROM wdpa_protected_areas WHERE wdpaid = {{wdpaid}}`;
 
 const WDPA = `WITH p as (SELECT CASE
               WHEN marine::numeric = 2 then null
@@ -53,11 +59,11 @@ const WDPA = `WITH p as (SELECT CASE
               WHEN ST_NPoints(the_geom) BETWEEN 18000 AND 50000 THEN ST_RemoveRepeatedPoints(the_geom, 0.001)
               ELSE ST_RemoveRepeatedPoints(the_geom, 0.005)
              END as the_geom, gis_area*100 as area_ha FROM wdpa_protected_areas where wdpaid={{wdpaid}})
-        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date
+        SELECT sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha
         FROM gran_chaco_deforestation f inner join p
         ON ST_Intersects(f.the_geom, p.the_geom)
         AND date >= '{{begin}}'::date
-              AND date <= '{{end}}'::date`;
+              AND date <= '{{end}}'::date GROUP BY area_ha`;
 
 const LATEST = `with a AS (SELECT DISTINCT date
     FROM gran_chaco_deforestation
@@ -113,11 +119,9 @@ class CartoDBServiceV2 {
 
     getDownloadUrls(query, params) {
         try{
-            let formats = ['csv', 'geojson', 'kml', 'shp', 'svg'];
+            let formats = ['csv', 'json', 'kml', 'shp', 'svg'];
             let download = {};
             let queryFinal = Mustache.render(query, params);
-            queryFinal = queryFinal.replace('sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date, area_ha', 'f.*');
-            queryFinal = queryFinal.replace('sum(sup) AS value, MIN(date) as min_date, MAX(date) as max_date', 'f.*');
             queryFinal = encodeURIComponent(queryFinal);
             for(let i=0, length = formats.length; i < length; i++){
                 download[formats[i]] = this.apiUrl + '?q=' + queryFinal + '&format=' + formats[i];
@@ -201,7 +205,7 @@ class CartoDBServiceV2 {
 }
 
 
-    * getUse(useName, useTable, id, period = defaultDate()) {
+    * getUse(useTable, id, period = defaultDate()) {
         logger.debug('Obtaining use with id %s', id);
         let periods = period.split(',');
         let params = {
@@ -211,19 +215,27 @@ class CartoDBServiceV2 {
             end: periods[1]
         };
 
-        const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
         let data = yield executeThunk(this.client, USE, params);
-        if (geostore) {
-            if (data.rows && data.rows.length > 0) {
-                let result = data.rows[0];
-                result.area_ha = geostore.areaHa;
-                result.period = this.getPeriodText(period);
-                result.downloadUrls = this.getDownloadUrls(USE, params);
-                return result;
-            } else {
-                return {
-                    area_ha: geostore.areaHa   
-                };
+        if (data.rows && data.rows.length > 0) {
+            let result = data.rows[0];
+            result.id = id;
+            result.period = this.getPeriodText(period);
+            result.downloadUrls = this.getDownloadUrls(USE, params);
+            return result;
+        }
+        let areas = yield executeThunk(this.client, USEAREA, params);
+        if (areas.rows && areas.rows.length > 0) {
+            let result = areas.rows[0];
+            result.id = id;
+            result.value = 0;
+            return result;
+        }
+        const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
+        if(geostore){
+            return {
+                id, id,
+                value: 0,
+                area_ha: geostore.area_ha
             }
         }
         return null;
@@ -238,19 +250,27 @@ class CartoDBServiceV2 {
             end: periods[1]
         };
 
-        const geostore = yield GeostoreService.getGeostoreByWdpa(wdpaid);
         let data = yield executeThunk(this.client, WDPA, params);
-        if (geostore) {
-            if (data.rows && data.rows.length > 0) {
-                let result = data.rows[0];
-                result.area_ha = geostore.areaHa;
-                result.period = this.getPeriodText(period);
-                result.downloadUrls = this.getDownloadUrls(WDPA, params);
-                return result;
-            } else {
-                return {
-                    area_ha: geostore.areaHa   
-                };
+        if (data.rows && data.rows.length > 0) {
+            let result = data.rows[0];
+            result.id = wdpaid;
+            result.period = period;
+            result.downloadUrls = this.getDownloadUrls(WDPA, params);
+            return result;
+        }
+        let areas = yield executeThunk(this.client, WDPAAREA, params);
+        if (areas.rows && areas.rows.length > 0) {
+            let result = areas.rows[0];
+            result.id = wdpaid;
+            result.value = 0;
+            return result;
+        }
+        const geostore = yield GeostoreService.getGeostoreByWdpa(wdpaid);
+        if(geostore){
+            return {
+                id: wdpaid,
+                value: 0,
+                area_ha: geostore.area_ha
             }
         }
         return null;
