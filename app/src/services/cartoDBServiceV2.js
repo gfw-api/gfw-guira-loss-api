@@ -233,6 +233,7 @@ class CartoDBServiceV2 {
         const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
         if(geostore){
             return {
+                id, id,
                 value: 0,
                 area_ha: geostore.area_ha
             }
@@ -267,6 +268,7 @@ class CartoDBServiceV2 {
         const geostore = yield GeostoreService.getGeostoreByUse(useName, id);
         if(geostore){
             return {
+                id: wdpaid,
                 value: 0,
                 area_ha: geostore.area_ha
             }
