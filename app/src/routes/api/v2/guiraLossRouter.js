@@ -2,9 +2,9 @@
 
 var Router = require('koa-router');
 var logger = require('logger');
-var CartoDBService = require('services/cartoDBService');
+var CartoDBServiceV2 = require('services/cartoDBServiceV2');
 var NotFound = require('errors/notFound');
-var GuiraLossSerializer = require('serializers/guiraLossSerializer');
+var GuiraLossSerializerV2 = require('serializers/guiraLossSerializerV2');
 
 
 var router = new Router({
@@ -12,58 +12,48 @@ var router = new Router({
 });
 
 class guiraLossRouter {
-    static * getNational() {
+    static * getAdm0() {
         logger.info('Obtaining national data');
-        let data = yield CartoDBService.getNational(this.params.iso, this.query.period);
+        let data = yield CartoDBServiceV2.getAdm0(this.params.iso, this.query.period);
 
-        this.body = GuiraLossSerializer.serialize(data);
+        this.body = GuiraLossSerializerV2.serialize(data);
     }
 
-    static * getSubnational() {
+    static * getAdm1() {
         logger.info('Obtaining subnational data');
-        let data = yield CartoDBService.getSubnational(this.params.iso, this.params.id1, this.query.period);
-        this.body = GuiraLossSerializer.serialize(data);
+        let data = yield CartoDBServiceV2.getAdm1(this.params.iso, this.params.id1, this.query.period);
+        this.body = GuiraLossSerializerV2.serialize(data);
+    }
+
+    static * getAdm2() {
+        logger.info('Obtaining subnational data');
+        let data = yield CartoDBServiceV2.getAdm2(this.params.iso, this.params.id1, this.params.id2, this.query.period);
+        this.body = GuiraLossSerializerV2.serialize(data);
     }
 
     static * use() {
         logger.info('Obtaining use data with name %s and id %s', this.params.name, this.params.id);
-        let useTable = null;
-        switch (this.params.name) {
-            case 'mining':
-                useTable = 'gfw_mining';
-                break;
-            case 'oilpalm':
-                useTable = 'gfw_oil_palm';
-                break;
-            case 'fiber':
-                useTable = 'gfw_wood_fiber';
-                break;
-            case 'logging':
-                useTable = 'gfw_logging';
-                break;
-            default:
-                useTable = this.params.name;
-        }
+        let useTable = this.params.name;
         if (!useTable) {
             this.throw(404, 'Name not found');
         }
-        let data = yield CartoDBService.getUse(this.params.name, useTable, this.params.id, this.query.period);
-        this.body = GuiraLossSerializer.serialize(data);
+        let data = yield CartoDBServiceV2.getUse(useTable, this.params.id, this.query.period);
+        this.body = GuiraLossSerializerV2.serialize(data);
 
     }
 
     static * wdpa() {
         logger.info('Obtaining wpda data with id %s', this.params.id);
-        let data = yield CartoDBService.getWdpa(this.params.id, this.query.period);
-        this.body = GuiraLossSerializer.serialize(data);
+        let data = yield CartoDBServiceV2.getWdpa(this.params.id, this.query.period);
+        this.body = GuiraLossSerializerV2.serialize(data);
     }
 
     static * world() {
         logger.info('Obtaining world data');
         this.assert(this.query.geostore, 400, 'GeoJSON param required');
         try {
-            let data = yield CartoDBService.getWorld(this.query.geostore, this.query.period);
-            this.body = GuiraLossSerializer.serialize(data);
+            let data = yield CartoDBServiceV2.getWorld(this.query.geostore, this.query.period);
+            this.body = GuiraLossSerializerV2.serialize(data);
         } catch (err) {
             if (err instanceof NotFound) {
                 this.throw(404, 'Geostore not found');
@@ -96,9 +86,9 @@ class guiraLossRouter {
         logger.info('Obtaining world data with geostore');
         this.assert(this.request.body.geojson, 400, 'GeoJSON param required');
         try{
-            let data = yield CartoDBService.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), null, this.query.period);
+            let data = yield CartoDBServiceV2.getWorldWithGeojson(guiraLossRouter.checkGeojson(this.request.body.geojson), null, this.query.period);
 
-            this.body = GuiraLossSerializer.serialize(data);
+            this.body = GuiraLossSerializerV2.serialize(data);
         } catch(err){
             if(err instanceof NotFound){
                 this.throw(404, 'Geostore not found');
@@ -111,8 +101,8 @@ class guiraLossRouter {
 
     static * latest() {
         logger.info('Obtaining latest data');
-        let data = yield CartoDBService.latest(this.query.limit);
-        this.body = GuiraLossSerializer.serializeLatest(data);
+        let data = yield CartoDBServiceV2.latest(this.query.limit);
+        this.body = GuiraLossSerializerV2.serializeLatest(data);
     }
 
 }
@@ -126,8 +116,9 @@ var isCached = function*(next) {
 
 
 
-router.get('/admin/:iso', isCached, guiraLossRouter.getNational);
-router.get('/admin/:iso/:id1', isCached, guiraLossRouter.getSubnational);
+router.get('/admin/:iso', isCached, guiraLossRouter.getAdm0);
+router.get('/admin/:iso/:id1', isCached, guiraLossRouter.getAdm1);
+router.get('/admin/:iso/:id1/:id2', isCached, guiraLossRouter.getAdm2);
 router.get('/use/:name/:id', isCached, guiraLossRouter.use);
 router.get('/wdpa/:id', isCached, guiraLossRouter.wdpa);
 router.get('/', isCached, guiraLossRouter.world);
