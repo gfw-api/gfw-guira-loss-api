@@ -1,5 +1,7 @@
 # GFW Guira Loss API
 
+[![Build Status](https://travis-ci.org/gfw-api/gfw-guira-loss-api.svg?branch=develop)](https://travis-ci.org/gfw-api/gfw-guira-loss-api)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/bd10718ad3aa55db6e7a/test_coverage)](https://codeclimate.com/github/gfw-api/gfw-guira-loss-api/test_coverage)
 
 This repository is the microservice that it implement the guira loss funcionality and exposed the /guira-loss endpoints in the api-gateway
 
