@@ -1,10 +1,8 @@
-'use strict';
+const JSONAPISerializer = require('jsonapi-serializer').Serializer;
 
-var logger = require('logger');
-var JSONAPISerializer = require('jsonapi-serializer').Serializer;
-var guiraLossSerializer = new JSONAPISerializer('guira-loss', {
+const guiraLossSerializer = new JSONAPISerializer('guira-loss', {
     attributes: ['value', 'period', 'min_date', 'max_date', 'downloadUrls', 'area_ha'],
-    typeForAttribute: function(attribute, record) {
+    typeForAttribute(attribute) {
         return attribute;
     },
     downloadUrls: {
@@ -13,9 +11,9 @@ var guiraLossSerializer = new JSONAPISerializer('guira-loss', {
     keyForAttribute: 'camelCase'
 });
 
-var guiraLatestSerializer = new JSONAPISerializer('guira-latest', {
+const guiraLatestSerializer = new JSONAPISerializer('guira-latest', {
     attributes: ['date'],
-    typeForAttribute: function(attribute, record) {
+    typeForAttribute(attribute) {
         return attribute;
     }
 });
@@ -25,9 +23,11 @@ class GuiraLossSerializer {
     static serialize(data) {
         return guiraLossSerializer.serialize(data);
     }
+
     static serializeLatest(data) {
         return guiraLatestSerializer.serialize(data);
     }
+
 }
 
 module.exports = GuiraLossSerializer;

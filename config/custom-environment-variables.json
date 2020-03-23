@@ -1,5 +1,5 @@
 {
-    "cartoDB":{
-        "user": "CARTODB_USER"
-    }
+  "cartoDB": {
+    "user": "CARTODB_USER"
+  }
 }
