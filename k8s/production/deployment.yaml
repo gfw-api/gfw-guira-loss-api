@@ -3,8 +3,9 @@ kind: Deployment
 metadata:
   namespace: gfw
   labels:
-    name: {name}
-  name: {name}
+    name: gfw-guira
+    app: gfw
+  name: gfw-guira
 spec:
   revisionHistoryLimit: 2
   template:
@@ -12,11 +13,11 @@ spec:
       annotations:
         chaos.alpha.kubernetes.io/enabled: "true"
       labels:
-        name: {name}
+        name: gfw-guira
     spec:
       containers:
-      - name: {name}
-        image: vizzuality/{name}
+      - name: gfw-guira
+        image: vizzuality/gfw-guira
         imagePullPolicy: Always
         resources:
           requests:
@@ -33,7 +34,7 @@ spec:
           - name: NODE_PATH
             value: app/src
           - name: LOCAL_URL
-            value: http://{name}.gfw.svc.cluster.local:3600
+            value: http://gfw-guira.gfw.svc.cluster.local:3600
           - name: CT_URL
             valueFrom:
                 secretKeyRef:
