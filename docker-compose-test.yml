@@ -1,8 +1,16 @@
-test:
-  extends:
-    file: base.yml
-    service: base
-  container_name: gfw-guira-loss-api-test
-  environment:
-    NODE_ENV: test
-  command: test
+version: "3"
+services:
+  test:
+    build: .
+    ports:
+      - "3600:3600"
+    container_name: gfw-guira-loss-api-test
+    environment:
+      PORT: 3600
+      NODE_PATH: app/src
+      CARTODB_USER: wri-test
+      CT_URL: http://mymachine:9000
+      API_VERSION: v1
+      CT_REGISTER_MODE: auto
+      NODE_ENV: test
+    command: test
