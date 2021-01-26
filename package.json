@@ -52,7 +52,6 @@
     "koa-validate": "0.2.11",
     "lru-cache": "4.0.1",
     "mustache": "2.2.1",
-    "newrelic": "1.27.1",
     "vizz.microservice-client": "1.6.2"
   },
   "devDependencies": {
