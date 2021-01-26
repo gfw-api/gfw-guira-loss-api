@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 const logger = require('logger');
 const JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+const { RWAPIMicroservice } = require('rw-api-microservice-node');
 
 
 const deserializer = (obj) => (callback) => {
@@ -12,10 +13,11 @@ class GeostoreService {
 
     static* getGeostore(path) {
         logger.debug('Obtaining geostore with path %s', path);
-        const result = yield require('vizz.microservice-client').requestToMicroservice({
+        const result = yield RWAPIMicroservice.requestToMicroservice({
             uri: `/geostore/${path}`,
             method: 'GET',
-            json: true
+            json: true,
+            resolveWithFullResponse: true
         });
         if (result.statusCode !== 200) {
             logger.warn('Error obtaining geostore:');
