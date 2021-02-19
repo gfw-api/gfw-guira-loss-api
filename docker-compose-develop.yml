@@ -3,10 +3,10 @@ services:
   develop:
     build: .
     ports:
-      - "3600:3600"
+      - "3601:3601"
     container_name: gfw-guira-loss-api-develop
     environment:
-      PORT: 3600
+      PORT: 3601
       NODE_PATH: app/src
       NODE_ENV: dev
       CARTODB_USER: wri-test
@@ -14,7 +14,7 @@ services:
       API_VERSION: v1
       CT_REGISTER_MODE: auto
       CT_TOKEN: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1pY3Jvc2VydmljZSIsImNyZWF0ZWRBdCI6IjIwMTYtMDktMTQifQ.IRCIRm1nfIQTfda_Wb6Pg-341zhV8soAgzw7dd5HxxQ
-      LOCAL_URL: http://127.0.0.1:3600
+      LOCAL_URL: http://mymachine:3601
       FASTLY_ENABLED: "false"
     command: develop
     volumes:
