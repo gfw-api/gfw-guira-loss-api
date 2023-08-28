@@ -8,7 +8,7 @@ class GeostoreService {
     static async getGeostore(path: string, apiKey: string): Promise<Record<string, any>> {
         logger.debug('Obtaining geostore with path %s', path);
         const result: Record<string, any> = await RWAPIMicroservice.requestToMicroservice({
-            uri: `/geostore/${path}`,
+            uri: `/v1/geostore/${path}`,
             method: 'GET',
             headers: {
                 'x-api-key': apiKey
